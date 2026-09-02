@@ -12,7 +12,7 @@ $messageErreur = null;
 
 try {
     // 1. Charger la connexion PDO (définit la variable $pdo)
-    require __DIR__ . '/config/database.php';
+    require __DIR__ . '/db/database.php';
 
     // 2. Préparer et exécuter la requête SQL
     $requete = $pdo->prepare(
