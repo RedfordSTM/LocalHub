@@ -5,6 +5,27 @@ declare(strict_types=1);
 $nomProjet = 'SkillyHub';
 $auteur = 'Redford S. St-M.';
 $versionPhp = PHP_VERSION;
+
+
+$messages = [];
+$messageErreur = null;
+
+try {
+    // 1. Charger la connexion PDO (définit la variable $pdo)
+    require __DIR__ . '/config/database.php';
+
+    // 2. Préparer et exécuter la requête SQL
+    $requete = $pdo->prepare(
+        'SELECT id, titre, contenu, date_cree
+         FROM messages
+         ORDER BY date_cree DESC, id DESC'
+    );
+    $requete->execute();
+    $messages = $requete->fetchAll();
+} catch (Throwable $exception) {
+    error_log($exception->getMessage());
+    $messageErreur = 'Impossible de charger les messages.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
