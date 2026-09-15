@@ -116,11 +116,17 @@ Le projet utilise PHP côté serveur avec HTML et CSS pour l'interface.
 Après toute modification du code, il suffit de recharger la page dans le navigateur.
 
 📁 Structure du projet
-La structure peut évoluer au cours du développement, mais le projet suit une organisation permettant de séparer notamment :
+La structure peut évoluer au cours du développement, mais le projet suit une modele d'organisation MVC permettant de séparer notamment :
 LocalHub/
+├── config/
+├── Controleurs/
 ├── css/
+├── database/
+├── docs/
 ├── img/
 ├── maquettes/
+├── Modeles/
+├── Vues/
 ├── index.php
 ├── recits.php
 └── README.md
