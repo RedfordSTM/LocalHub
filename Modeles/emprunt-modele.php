@@ -46,3 +46,66 @@ function obtenirOutilParId(PDO $pdo, int $id): ?array
     $requete->execute(['id' => $id]);
     return $requete->fetch() ?: null;
 }
+
+function ajouterReservation(
+    PDO $pdo,
+    int $idPublication,
+    int $idDemandeur,
+    int $idProprietaire,
+    string $dateDebut,
+    string $dateFin,
+    string $message = ''
+): int {
+    $requete = $pdo->prepare(
+        'INSERT INTO reservation 
+         (id_publication, id_demandeur, id_proprietaire, date_debut, date_fin, statut, message)
+         VALUES (:id_publication, :id_demandeur, :id_proprietaire, :date_debut, :date_fin, :statut, :message)'
+    );
+
+    $requete->execute([
+        'id_publication' => $idPublication,
+        'id_demandeur' => $idDemandeur,
+        'id_proprietaire' => $idProprietaire,
+        'date_debut' => $dateDebut,
+        'date_fin' => $dateFin,
+        'statut' => 'en_attente',
+        'message' => $message,
+    ]);
+
+    return (int) $pdo->lastInsertId();
+}
+
+function obtenirReservation(PDO $pdo, int $id): ?array
+{
+    $requete = $pdo->prepare(
+        'SELECT
+            reservation.id_reservation,
+            reservation.id_publication,
+            reservation.date_debut,
+            reservation.date_fin,
+            reservation.statut,
+            reservation.message,
+            publication.titre
+         FROM reservation
+         INNER JOIN publication
+             ON reservation.id_publication = publication.id_publication
+         WHERE reservation.id_reservation = :id'
+    );
+
+    $requete->execute(['id' => $id]);
+    return $requete->fetch() ?: null;
+}
+
+function annulerReservation(PDO $pdo, int $id): bool
+{
+    $requete = $pdo->prepare(
+        'UPDATE reservation SET statut = :statut WHERE id_reservation = :id'
+    );
+
+    $requete->execute([
+        'id' => $id,
+        'statut' => 'annulee',
+    ]);
+
+    return $requete->rowCount() === 1;
+}

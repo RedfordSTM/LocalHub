@@ -10,16 +10,19 @@ $messageErreur = null;
 $publicationsRecentes = [];
 
 try {
+    // 1. Include database connection (ensure it initializes $pdo)
     require __DIR__ . '/../config/database.php';
-    require __DIR__ . '/../Modeles/ressource-modele.php';
+    
+    // 2. Include the correct publication model
+    require __DIR__ . '/../Modeles/publication-modele.php';
 
-    $publications = obtenirPublications($pdo);
-    $publicationsRecentes = array_slice($publications, 0, 5);
+    // 3. Fetch recent publications (adjust the function name if it differs in your model)
+    $publicationsRecentes = obtenirPublications($pdo);
 
     require __DIR__ . '/../Vues/accueil.php';
 } catch (Throwable $exception) {
     error_log($exception->getMessage());
-    $messageErreur = 'Impossible de charger les publications.';
+    $messageErreur = 'Impossible de charger cette page daccueil.';
 
     require __DIR__ . '/../Vues/erreur.php';
 }

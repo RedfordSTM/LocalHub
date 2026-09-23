@@ -12,7 +12,7 @@
     .owner { color: #666; margin-top: 10px; font-size: 0.9em; }
 </style>
 
-<h1>📦 Emprunts et partage de matériel</h1>
+<h1>Emprunts et partage de matériel</h1>
 
 <div class="lending-filters">
     <p><strong>Filtrer par :</strong></p>
@@ -37,11 +37,11 @@
             
             <div class="item-details">
                 <div>
-                    <strong>📍 Lieu :</strong>
+                    <strong>Lieu :</strong>
                     <span class="location"><?= htmlspecialchars($outil['ville'], ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
                 <div>
-                    <strong>🏷️ Catégorie :</strong>
+                    <strong>Catégorie :</strong>
                     <span><?= htmlspecialchars($outil['categorie'], ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             </div>
