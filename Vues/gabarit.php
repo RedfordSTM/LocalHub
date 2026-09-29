@@ -10,9 +10,8 @@
 
     <nav>
         <ul>
-            <li><a href="accueil.php">Accueil</a></li>
-            <li><a href="recits.php">Récits utilisateurs</a></li>
-            <li><a href="publication.php">Publications</a></li>
+            <li><a href="index.php?action=accueil">Accueil</a></li>
+            <li><a href="index.php?action=publications">Publications</a></li>
             <li><a href="index.php?action=emprunts">Emprunts</a></li>
             <li><a href="#">Activités (À venir)</a></li>
             <li><a href="#">Services (À venir)</a></li>
