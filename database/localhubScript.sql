@@ -145,6 +145,7 @@ CREATE TABLE reservation (
     date_debut DATE NOT NULL,
     date_fin DATE NOT NULL,
     statut VARCHAR(30) NOT NULL DEFAULT 'en_attente',
+    message TEXT NULL DEFAULT NULL,
     date_demande DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_reservation_publication
@@ -197,4 +198,4 @@ VALUES
         'Parc Jarry, Montréal',
         15
     );
-    
+    

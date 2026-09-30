@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 class Routeur
 {
+    private $controleurAccueil;
     private $controleurPublication;
     private $controleurEmprunt;
     private $controleurErreur;
 
     public function __construct(
+        ControleurAccueil $controleurAccueil,
         ControleurPublication $controleurPublication,
         ControleurEmprunt $controleurEmprunt,
         ControleurErreur $controleurErreur
     ) {
+        $this->controleurAccueil = $controleurAccueil;
         $this->controleurPublication = $controleurPublication;
         $this->controleurEmprunt = $controleurEmprunt;
         $this->controleurErreur = $controleurErreur;
@@ -20,32 +23,57 @@ class Routeur
 
     public function router(): void
     {
-        // Par défaut, on affiche la liste des publications (ou de l'accueil)
-        $action = $_GET['action'] ?? 'publications';
+        $action = $_GET['action'] ?? 'accueil';
 
         try {
             switch ($action) {
+                case 'accueil':
+                    $this->controleurAccueil->afficherAccueil();
+                    break;
+
                 case 'publications':
                     $this->controleurPublication->afficherPublications();
                     break;
 
-                case 'publication':
-                    // On récupère l'ID propre à la publication cliquée
-                    $this->controleurPublication->afficherDetail($this->lireIdGet());
+                case 'emprunts':
+                    $this->controleurEmprunt->afficherEmprunts();
                     break;
 
-                case 'emprunt-ajouter':
+                case 'demander-emprunt':
+                    $this->controleurEmprunt->afficherFormulaire($this->lireIdGet());
+                    break;
+
+                case 'ajouter-emprunt':
                     $this->exigerEcriture($_POST['jeton_csrf'] ?? null);
                     $this->controleurEmprunt->ajouter($_POST);
+                    break;
+
+                case 'confirmer-suppression':
+                    $this->controleurEmprunt->afficherConfirmationAnnulation($this->lireIdGet());
+                    break;
+
+                case 'annuler-emprunt':
+                    $this->exigerEcriture($_POST['jeton_csrf'] ?? null);
+                    $this->controleurEmprunt->annuler($_POST);
                     break;
 
                 default:
                     $this->controleurErreur->afficher('Page introuvable.', 404);
             }
         } catch (Throwable $exception) {
-            error_log($exception->getMessage());
-            // Si une exception non interceptée remonte jusqu'ici (ex: ID invalide)
-            $this->controleurErreur->afficher($exception->getMessage(), $exception->getCode() ?: 500);
+            // Les codes HTTP sont des entiers ; un PDOException, lui, a un code texte (ex. '42S22').
+            $code = $exception->getCode();
+            $statut = in_array($code, [400, 403, 404, 405], true) ? $code : 500;
+
+            $message = $statut === 500
+                ? 'Une erreur empêche le traitement de la demande.'
+                : $exception->getMessage();
+
+            if ($statut === 500) {
+                error_log($exception->getMessage());
+            }
+
+            $this->controleurErreur->afficher($message, $statut);
         }
     }
 

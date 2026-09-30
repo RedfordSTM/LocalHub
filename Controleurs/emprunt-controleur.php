@@ -2,95 +2,98 @@
 
 declare(strict_types=1);
 
-class ControleurEmprunt extends Modele{
-
-    private $publication;
-    private $commentaires;
+class ControleurEmprunt
+{
+    private $emprunt;
     private $vue;
     private $erreurs;
 
-    public function afficherEmprunts(PDO $pdo): void
+    public function __construct(Emprunt $emprunt, Vue $vue, ControleurErreur $erreurs)
     {
-        $outils = obtenirOutils($pdo);
-        $titrePage = 'Emprunts et partage de matériel';
-        
-        require __DIR__ . '/../Vues/emprunts/emprunts.php';
+        $this->emprunt = $emprunt;
+        $this->vue = $vue;
+        $this->erreurs = $erreurs;
     }
-    
-    function afficherFormulaireEmprunt(
-        PDO $pdo,
-        int $id,
-        array $erreurs = [],
-        array $valeurs = []
-    ): void {
-        $outil = obtenirOutilParId($pdo, $id);
-        
+
+    public function afficherEmprunts(): void
+    {
+        $ville = trim((string) ($_GET['ville'] ?? ''));
+
+        $outils = $this->emprunt->obtenirTous($ville !== '' ? $ville : null);
+
+        $this->vue->afficher(
+            'emprunts/emprunts',
+            ['outils' => $outils],
+            'Emprunts et partage de matériel'
+        );
+    }
+
+    public function afficherFormulaire(int $id, array $erreurs = [], array $valeurs = []): void
+    {
+        $outil = $this->emprunt->obtenirParId($id);
+
         if ($outil === null) {
-            afficherErreur('Outil introuvable.', 404);
+            $this->erreurs->afficher('Outil introuvable.', 404);
             return;
         }
-        
-        $titrePage = 'Demander un emprunt - ' . $outil['titre'];
-        require __DIR__ . '/../Vues/emprunts/ajouter.php';
+
+        $this->vue->afficher(
+            'emprunts/ajouter',
+            ['outil' => $outil, 'erreurs' => $erreurs, 'valeurs' => $valeurs],
+            'Demander un emprunt - ' . $outil['titre']
+        );
     }
-    
-    function ajouterEmpruntAction(PDO $pdo): void
+
+    public function ajouter(array $donnees): void
     {
-        $idPublication = filter_input(INPUT_POST, 'id_publication', FILTER_VALIDATE_INT);
-        $dateDebut = trim((string) ($_POST['date_debut'] ?? ''));
-        $dateFin = trim((string) ($_POST['date_fin'] ?? ''));
-        $message = trim((string) ($_POST['message'] ?? ''));
+        $idPublication = filter_var($donnees['id_publication'] ?? null, FILTER_VALIDATE_INT);
+        $dateDebut = trim((string) ($donnees['date_debut'] ?? ''));
+        $dateFin = trim((string) ($donnees['date_fin'] ?? ''));
+        $message = trim((string) ($donnees['message'] ?? ''));
         $erreurs = [];
         $valeurs = [
             'date_debut' => $dateDebut,
             'date_fin' => $dateFin,
             'message' => $message,
         ];
-    
-        // Valider l'identifiant de la publication
-        if ($idPublication === false || $idPublication === null) {
-            afficherErreur('Identifiant invalide.', 400);
+
+        if ($idPublication === false) {
+            $this->erreurs->afficher('Identifiant invalide.', 400);
             return;
         }
-    
-        // Vérifier que l'outil existe
-        $outil = obtenirOutilParId($pdo, $idPublication);
+
+        $outil = $this->emprunt->obtenirParId($idPublication);
         if ($outil === null) {
-            afficherErreur('Outil introuvable.', 404);
+            $this->erreurs->afficher('Outil introuvable.', 404);
             return;
         }
-    
-        // Valider les dates
-        if (empty($dateDebut)) {
+
+        if ($dateDebut === '') {
             $erreurs['date_debut'] = 'La date de début est obligatoire.';
-        } elseif (!validerDate($dateDebut)) {
+        } elseif (!$this->validerDate($dateDebut)) {
             $erreurs['date_debut'] = 'Format de date invalide (YYYY-MM-DD).';
         } elseif (strtotime($dateDebut) < strtotime('today')) {
             $erreurs['date_debut'] = 'La date de début doit être aujourd\'hui ou dans le futur.';
         }
-    
-        if (empty($dateFin)) {
+
+        if ($dateFin === '') {
             $erreurs['date_fin'] = 'La date de fin est obligatoire.';
-        } elseif (!validerDate($dateFin)) {
+        } elseif (!$this->validerDate($dateFin)) {
             $erreurs['date_fin'] = 'Format de date invalide (YYYY-MM-DD).';
-        } elseif (!empty($dateDebut) && strtotime($dateFin) <= strtotime($dateDebut)) {
+        } elseif (!isset($erreurs['date_debut']) && strtotime($dateFin) <= strtotime($dateDebut)) {
             $erreurs['date_fin'] = 'La date de fin doit être après la date de début.';
         }
-    
-        // Valider le message optionnel
+
         if (mb_strlen($message) > 500) {
             $erreurs['message'] = 'Le message ne doit pas dépasser 500 caractères.';
         }
-    
-        // S'il y a des erreurs, recharger le formulaire
+
         if (!empty($erreurs)) {
-            afficherFormulaireEmprunt($pdo, $idPublication, $erreurs, $valeurs);
+            $this->afficherFormulaire($idPublication, $erreurs, $valeurs);
             return;
         }
-    
-        // Ajouter la réservation
-        $idReservation = ajouterReservation(
-            $pdo,
+
+        $this->emprunt->ajouterReservation(
             $idPublication,
             1, // À remplacer par l'ID de l'utilisateur connecté (chapitre 4)
             (int) $outil['id_utilisateur'],
@@ -98,60 +101,58 @@ class ControleurEmprunt extends Modele{
             $dateFin,
             $message
         );
-    
-        // Rediriger vers la liste
+
         header('Location: index.php?action=emprunts');
         exit;
     }
-    
-    function afficherConfirmationAnnulationEmprunt(PDO $pdo, int $idReservation): void
+
+    public function afficherConfirmationAnnulation(int $idReservation): void
     {
-        $emprunt = obtenirReservation($pdo, $idReservation);
-    
+        $emprunt = $this->emprunt->obtenirReservation($idReservation);
+
         if ($emprunt === null) {
-            afficherErreur('Demande d\'emprunt introuvable.', 404);
+            $this->erreurs->afficher('Demande d\'emprunt introuvable.', 404);
             return;
         }
-    
-        $titrePage = 'Annuler la demande d\'emprunt';
-        require __DIR__ . '/../Vues/emprunts/confirmer-suppression.php';
+
+        $this->vue->afficher(
+            'emprunts/confirmer-suppression',
+            ['emprunt' => $emprunt],
+            'Annuler la demande d\'emprunt'
+        );
     }
-    
-    function annulerEmpruntAction(PDO $pdo): void
+
+    public function annuler(array $donnees): void
     {
-        $idReservation = filter_input(INPUT_POST, 'id_reservation', FILTER_VALIDATE_INT);
-    
-        if ($idReservation === false || $idReservation === null) {
-            afficherErreur('Identifiant invalide.', 400);
+        $idReservation = filter_var($donnees['id_reservation'] ?? null, FILTER_VALIDATE_INT);
+
+        if ($idReservation === false) {
+            $this->erreurs->afficher('Identifiant invalide.', 400);
             return;
         }
-    
-        $emprunt = obtenirReservation($pdo, $idReservation);
-    
-        if ($emprunt === null) {
-            afficherErreur('Demande d\'emprunt introuvable.', 404);
+
+        if ($this->emprunt->obtenirReservation($idReservation) === null) {
+            $this->erreurs->afficher('Demande d\'emprunt introuvable.', 404);
             return;
         }
-    
-        // Annuler la réservation
-        annulerReservation($pdo, $idReservation);
-    
-        // Rediriger vers la liste des emprunts
+
+        $this->emprunt->annulerReservation($idReservation);
+
         header('Location: index.php?action=emprunts');
         exit;
     }
-    
+
     /**
      * Valider le format d'une date YYYY-MM-DD
      */
-    function validerDate(string $date): bool
+    private function validerDate(string $date): bool
     {
-        $pattern = '/^\d{4}-\d{2}-\d{2}$/';
-        if (!preg_match($pattern, $date)) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             return false;
         }
-        
+
         [$annee, $mois, $jour] = explode('-', $date);
+
         return checkdate((int) $mois, (int) $jour, (int) $annee);
     }
 }

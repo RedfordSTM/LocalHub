@@ -6,8 +6,11 @@ require_once __DIR__ . '/Modele.php';
 
 class Emprunt extends Modele
 {
-    public function obtenirTous(): array
+    public function obtenirTous(?string $ville = null): array
     {
+        $filtreVille = $ville !== null ? ' AND publication.ville LIKE :ville' : '';
+        $parametres = $ville !== null ? ['ville' => '%' . $ville . '%'] : [];
+
         return $this->executer(
             'SELECT
                 publication.id_publication,
@@ -22,8 +25,9 @@ class Emprunt extends Modele
                  ON publication.id_utilisateur = utilisateur.id_utilisateur
              INNER JOIN categorie
                  ON publication.id_categorie = categorie.id_categorie
-             WHERE publication.type = "outil" AND publication.statut = "active"
-             ORDER BY publication.date_creation DESC'
+             WHERE publication.type = "outil" AND publication.statut = "active"' . $filtreVille . '
+             ORDER BY publication.date_creation DESC',
+            $parametres
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -110,4 +114,4 @@ class Emprunt extends Modele
 
         return $requete->rowCount() === 1;
     }
-}
+}
