@@ -1,5 +1,3 @@
-<?php ob_start(); ?>
-
 <style>
     .lending-filters { background: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
     .lending-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; background: #fafafa; }
@@ -57,8 +55,3 @@
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
-
-<?php
-$contenu = ob_get_clean();
-require __DIR__ . '/../gabarit.php';
-?>

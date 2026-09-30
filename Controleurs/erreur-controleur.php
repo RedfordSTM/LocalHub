@@ -2,11 +2,17 @@
 
 declare(strict_types=1);
 
-function afficherErreur(string $message, int $statut = 500): void
-{
-    http_response_code($statut);
-    $titrePage = 'Erreur';
-    $messageErreur = $message;
+class ControleurErreur {
+    private $vue;
 
-    require __DIR__ . '/../Vues/erreur.php';
+    public function __construct(Vue $vue) {
+        $this->vue = $vue;
+    }
+
+    public function afficher(string $message, int $statut): void
+    {
+        http_response_code($statut);
+        
+        $this->vue->afficher('erreur', ['messageErreur' => $message], 'Erreur');
+    }
 }

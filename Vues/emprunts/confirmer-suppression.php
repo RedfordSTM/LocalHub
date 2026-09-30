@@ -1,5 +1,3 @@
-<?php ob_start(); ?>
-
 <h1>Annuler la demande d'emprunt</h1>
 
 <div style="background: #fef3cd; border: 1px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
@@ -51,8 +49,3 @@
         Retour
     </a>
 </form>
-
-<?php
-$contenu = ob_get_clean();
-require __DIR__ . '/../gabarit.php';
-?>

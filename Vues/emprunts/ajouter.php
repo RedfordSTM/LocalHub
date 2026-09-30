@@ -1,5 +1,3 @@
-<?php ob_start(); ?>
-
 <?php $premierChampErreur = array_key_first($erreurs ?? []); ?>
 
 <h1>Demander un emprunt</h1>
@@ -83,8 +81,3 @@
     input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #c00; background-color: #fee; }
     small { display: block; margin-top: 5px; color: #666; }
 </style>
-
-<?php
-$contenu = ob_get_clean();
-require __DIR__ . '/../gabarit.php';
-?>

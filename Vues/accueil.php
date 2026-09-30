@@ -17,4 +17,3 @@
     <h2>Public cible</h2>
     <p>Les personnes concernées sont les résidents d'une ville ou d'un quartier, selon le type de service offert.</p>
 </section>
-

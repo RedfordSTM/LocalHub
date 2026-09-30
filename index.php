@@ -2,89 +2,45 @@
 
 declare(strict_types=1);
 
-
-// 1. Charger les configurations et sécurités EN PREMIER (avant tout affichage ou sortie)
+// 1. Les inclusions (chemins de tes fichiers de classes)
+require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/securite.php';
-
-// 2. Charger les modèles
+require_once __DIR__ . '/Modeles/Modele.php';
 require_once __DIR__ . '/Modeles/emprunt-modele.php';
 require_once __DIR__ . '/Modeles/publication-modele.php';
-
-// 3. Charger les contrôleurs (seulement des définitions de fonctions !)
 require_once __DIR__ . '/Controleurs/accueil-controleur.php';
 require_once __DIR__ . '/Controleurs/erreur-controleur.php';
 require_once __DIR__ . '/Controleurs/emprunt-controleur.php';
 require_once __DIR__ . '/Controleurs/publication-controleur.php';
+require_once __DIR__ . '/Routage/Routeur.php';
+require_once __DIR__ . '/Vues/vue.php';
 
 demarrerSession();
 
-$action = $_GET['action'] ?? 'accueil';
+// 2. Initialisation des objets (Injection de dépendances)
+$publication = new Publication($pdo);
+$emprunt = new Emprunt($pdo); // (Assure-toi d'avoir cette classe ou ton équivalent)
+$vue = new Vue();
+$controleurErreur = new ControleurErreur($vue);
+$controleurPublication = new ControleurPublication($publication, $vue, $controleurErreur);
+$controleurEmprunt = new ControleurEmprunt($emprunt, $vue, $controleurErreur);
+$routeur = new Routeur($controleurPublication, $controleurEmprunt, $controleurErreur);
 
-try {
-    // Charger la connexion PDO
-    require_once __DIR__ . '/config/database.php';
+// 3. Lancement de l'application avec filet de sécurité global
+try { 
+    $routeur->router();
+} catch (Throwable $exception) {
+    $statut = in_array($exception->getCode(), [400, 403, 404, 405], true)
+        ? $exception->getCode()
+        : 500;
+    
+    $message = $statut === 500
+        ? 'Une erreur empêche le traitement de la demande.'
+        : $exception->getMessage();
 
-    // Router unique
-    switch ($action) {
-        case 'accueil':
-            afficherAccueil();
-            break;
-
-        case 'publications':
-            afficherPublications($pdo); 
-            break;
-
-        case 'emprunts':
-            afficherEmprunts($pdo);
-            break;
-
-        case 'demander-emprunt':
-            $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-            if ($id === false || $id === null) {
-                afficherErreur('Identifiant invalide.', 400);
-                break;
-            }
-            afficherFormulaireEmprunt($pdo, $id);
-            break;
-
-        case 'ajouter-emprunt':
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                afficherErreur('Méthode non permise.', 405);
-                break;
-            }
-            if (!verifierJetonCsrf($_POST['jeton_csrf'] ?? null)) {
-                afficherErreur('Requête refusée.', 403);
-                break;
-            }
-            ajouterEmpruntAction($pdo);
-            break;
-
-        case 'confirmer-suppression':
-            $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-            if ($id === false || $id === null) {
-                afficherErreur('Identifiant invalide.', 400);
-                break;
-            }
-            afficherConfirmationAnnulationEmprunt($pdo, $id);
-            break;
-
-        case 'annuler-emprunt':
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                afficherErreur('Méthode non permise.', 405);
-                break;
-            }
-            if (!verifierJetonCsrf($_POST['jeton_csrf'] ?? null)) {
-                afficherErreur('Requête refusée.', 403);
-                break;
-            }
-            annulerEmpruntAction($pdo);
-            break;
-
-        default:
-            afficherErreur('Page introuvable.', 404);
+    if ($statut === 500) {
+        error_log($exception->getMessage());
     }
 
-} catch (Throwable $exception) {
-    error_log($exception->getMessage());
-    afficherErreur('Une erreur empêche le traitement de la demande.', 500);
+    $controleurErreur->afficher($message, $statut);
 }
