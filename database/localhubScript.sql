@@ -137,13 +137,35 @@ CREATE TABLE evaluation (
 
 ) ENGINE=InnoDB;
 
+CREATE TABLE reservation (
+    id_reservation INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_publication INT UNSIGNED NOT NULL,
+    id_demandeur INT UNSIGNED NOT NULL,
+    id_proprietaire INT UNSIGNED NOT NULL,
+    date_debut DATE NOT NULL,
+    date_fin DATE NOT NULL,
+    statut VARCHAR(30) NOT NULL DEFAULT 'en_attente',
+    message TEXT NULL DEFAULT NULL,
+    date_demande DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_reservation_publication
+        FOREIGN KEY (id_publication)
+        REFERENCES publication(id_publication),
+    CONSTRAINT fk_reservation_demandeur
+        FOREIGN KEY (id_demandeur)
+        REFERENCES utilisateur(id_utilisateur),
+    CONSTRAINT fk_reservation_proprietaire
+        FOREIGN KEY (id_proprietaire)
+        REFERENCES utilisateur(id_utilisateur)
+) ENGINE=InnoDB;
+
 INSERT INTO categorie (nom, description) VALUES
     ('Aide', 'Demandes et offres d''aide entre utilisateurs.'),
     ('Services', 'Services proposés par les utilisateurs.'),
     ('Objets', 'Objets à vendre, donner ou échanger.'),
     ('Outils', 'Outils et équipements disponibles pour le partage.'),
     ('Activités', 'Activités locales auxquelles les utilisateurs peuvent participer.');
-    
+
 INSERT INTO utilisateur
     (nom, prenom, courriel, mot_de_passe, ville)
 VALUES
@@ -152,107 +174,21 @@ VALUES
     ('Roy', 'Thomas', 'thomas.roy@localhub.test', 'TEMPORAIRE', 'Laval'),
     ('Bouchard', 'Emma', 'emma.bouchard@localhub.test', 'TEMPORAIRE', 'Longueuil'),
     ('Côté', 'Maxime', 'maxime.cote@localhub.test', 'TEMPORAIRE', 'Montréal');
-    
+
 INSERT INTO publication
     (id_utilisateur, id_categorie, titre, description, type, prix, ville, statut)
 VALUES
+    (1, 4, 'Tondeuse à gazon disponible', 'Tondeuse en bon état de fonctionnement. Prêt disponible pour 2-3 jours. Une caution de $50 peut être demandée.', 'outil', NULL, 'Montréal', 'active'),
+    (3, 4, 'Échelle telescopique à prêter', 'Échelle de 20 pieds extensible. Parfait pour les petits travaux. Durée max: 1 semaine.', 'outil', NULL, 'Laval', 'active'),
+    (1, 1, 'Au secours', 'Je cherche un voisin disponible pour m''aider à déplacer un canapé samedi après-midi.', 'aide', NULL, 'Montréal', 'active'),
+    (2, 4, 'Perceuse sans fil à prêter', 'Je peux prêter ma perceuse sans fil pour des petits travaux. Durée maximale de 3 jours. Une caution peut être demandée.', 'outil', NULL, 'Montréal', 'active'),
+    (3, 2, 'Cours particuliers de mathématiques', 'J''offre des cours particuliers de mathématiques pour les étudiants du secondaire.', 'service', 20.00, 'Laval', 'active'),
+    (4, 3, 'Bureau de travail usagé', 'Bureau en bon état, idéal pour un espace de travail à la maison. Quelques marques d''utilisation.', 'objet', 60.00, 'Longueuil', 'active'),
+    (5, 5, 'Nettoyage communautaire du parc', 'Activité communautaire pour nettoyer le parc du quartier et rencontrer d''autres résidents.', 'activite', NULL, 'Montréal', 'active'),
+    (1, 2, 'Aide pour configurer un ordinateur', 'Je peux aider les voisins à installer et configurer leur ordinateur ou leurs logiciels.', 'service', NULL, 'Montréal', 'active'),
+    (2, 3, 'Chaise de bureau à donner', 'Chaise de bureau encore fonctionnelle. À venir chercher sur place.', 'objet', 0.00, 'Montréal', 'active'),
+    (4, 4, 'Escabeau disponible pour partage', 'Escabeau de 6 pieds disponible pour les voisins qui en ont besoin.', 'outil', NULL, 'Longueuil', 'active');
 
-    -- Publication 1 : demande d'aide
-    (
-        1,
-        1,
-        'Besoin d''aide pour déplacer un canapé',
-        'Je cherche un voisin disponible pour m''aider à déplacer un canapé samedi après-midi.',
-        'aide',
-        NULL,
-        'Montréal',
-        'active'
-    ),
-
-    -- Publication 2 : prêt d'outil
-    (
-        2,
-        4,
-        'Perceuse sans fil à prêter',
-        'Je peux prêter ma perceuse sans fil pour des petits travaux. Durée maximale de 3 jours. Une caution peut être demandée.',
-        'outil',
-        NULL,
-        'Montréal',
-        'active'
-    ),
-
-    -- Publication 3 : service
-    (
-        3,
-        2,
-        'Cours particuliers de mathématiques',
-        'J''offre des cours particuliers de mathématiques pour les étudiants du secondaire.',
-        'service',
-        20.00,
-        'Laval',
-        'active'
-    ),
-
-    -- Publication 4 : vente
-    (
-        4,
-        3,
-        'Bureau de travail usagé',
-        'Bureau en bon état, idéal pour un espace de travail à la maison. Quelques marques d''utilisation.',
-        'objet',
-        60.00,
-        'Longueuil',
-        'active'
-    ),
-
-    -- Publication 5 : activité
-    (
-        5,
-        5,
-        'Nettoyage communautaire du parc',
-        'Activité communautaire pour nettoyer le parc du quartier et rencontrer d''autres résidents.',
-        'activite',
-        NULL,
-        'Montréal',
-        'active'
-    ),
-
-    -- Publication supplémentaire : aide informatique
-    (
-        1,
-        2,
-        'Aide pour configurer un ordinateur',
-        'Je peux aider les voisins à installer et configurer leur ordinateur ou leurs logiciels.',
-        'service',
-        NULL,
-        'Montréal',
-        'active'
-    ),
-
-    -- Publication supplémentaire : objet gratuit
-    (
-        2,
-        3,
-        'Chaise de bureau à donner',
-        'Chaise de bureau encore fonctionnelle. À venir chercher sur place.',
-        'objet',
-        0.00,
-        'Montréal',
-        'active'
-    ),
-
-    -- Publication supplémentaire : outil
-    (
-        4,
-        4,
-        'Escabeau disponible pour partage',
-        'Escabeau de 6 pieds disponible pour les voisins qui en ont besoin.',
-        'outil',
-        NULL,
-        'Longueuil',
-        'active'
-    );
-    
 INSERT INTO activite
     (id_publication, date_heure, lieu, max_participants)
 VALUES
@@ -262,3 +198,4 @@ VALUES
         'Parc Jarry, Montréal',
         15
     );
+    

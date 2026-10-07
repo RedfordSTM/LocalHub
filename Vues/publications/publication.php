@@ -1,10 +1,3 @@
-<?php
-
-declare(strict_types=1);
-
-ob_start();
-?>
-
 <header>
     <h1>Publications disponibles</h1>
     <p>Projet : <strong><?= htmlspecialchars($nomProjet, ENT_QUOTES, 'UTF-8') ?></strong> | Auteur : <?= htmlspecialchars($auteur, ENT_QUOTES, 'UTF-8') ?></p>
@@ -32,7 +25,3 @@ ob_start();
         </article>
     <?php endforeach; ?>
 <?php endif; ?>
-
-<?php
-$contenu = ob_get_clean();
-require __DIR__ . '/../gabarit.php';
