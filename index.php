@@ -5,13 +5,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config/securite.php';
 require_once __DIR__ . '/Modeles/Modele.php';
-require_once __DIR__ . '/Modeles/emprunt-modele.php';
-require_once __DIR__ . '/Modeles/publication-modele.php';
+require_once __DIR__ . '/Modeles/emprunt.php';
+require_once __DIR__ . '/Modeles/publication.php';
 require_once __DIR__ . '/Vues/Vue.php';
-require_once __DIR__ . '/Controleurs/erreur-controleur.php';
-require_once __DIR__ . '/Controleurs/accueil-controleur.php';
-require_once __DIR__ . '/Controleurs/emprunt-controleur.php';
-require_once __DIR__ . '/Controleurs/publication-controleur.php';
+require_once __DIR__ . '/Controleurs/controleurErreur.php';
+require_once __DIR__ . '/Controleurs/controleurAccueil.php';
+require_once __DIR__ . '/Controleurs/controleurEmprunt.php';
+require_once __DIR__ . '/Controleurs/controleurPublication.php';
 require_once __DIR__ . '/Routage/Routeur.php';
 
 demarrerSession();
