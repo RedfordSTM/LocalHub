@@ -29,6 +29,7 @@ class EnregistrerPublicationRequest extends FormRequest
             'prix' => ['required', 'numeric'],
             'ville' => ['required', 'string', 'max:50'],
             'id_categorie' => ['required', 'integer', 'exists:categorie,id_categorie'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'statut' => ['required', 'string', 'max:10'],
         ];
     }

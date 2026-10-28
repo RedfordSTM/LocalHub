@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Publication;
 use App\Models\User;
 use App\Http\Requests\EnregistrerPublicationRequest;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PublicationController extends Controller
 {
@@ -40,11 +42,22 @@ class PublicationController extends Controller
     {
         $user = User::query()->firstOrFail();
 
-        $publication = Publication::create([
-            ...$request->validated(),
-            'id_utilisateur' => $user->id_utilisateur,
-            'date_creation' => now(),
-        ]);
+        $data = $request->safe()->except('image');
+        $path = $request->file('image')?->store('publications', 'public');
+
+        try {
+            $publication = Publication::create([
+                ...$data,
+                ...($path ? ['image_path' => $path] : []),
+                'id_utilisateur' => $user->id_utilisateur,
+                'date_creation' => now(),
+            ]);
+        } catch (Throwable $exception) {
+            if ($path) {
+                Storage::disk('public')->delete($path);
+            }
+            throw $exception;
+        }
 
         return redirect()->route('publications.show', $publication)
             ->with('status', 'publication créé.');
@@ -75,7 +88,25 @@ class PublicationController extends Controller
      */
     public function update(EnregistrerPublicationRequest $request, Publication $publication): RedirectResponse
     {
-        $publication->update($request->validated());
+        $data = $request->safe()->except('image');
+        $newPath = $request->file('image')?->store('publications', 'public');
+        $oldPath = $publication->image_path;
+
+        try {
+            $publication->update([
+                ...$data,
+                ...($newPath ? ['image_path' => $newPath] : []),
+            ]);
+        } catch (Throwable $exception) {
+            if ($newPath) {
+                Storage::disk('public')->delete($newPath);
+            } 
+            throw $exception;
+        }
+        
+        if ($newPath && $oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
 
         return redirect()->route('publications.show', $publication)
             ->with('status', 'publication modifié.');

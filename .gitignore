@@ -5,6 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+.aider*
 /.fleet
 /.idea
 /.nova
@@ -19,7 +20,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+public/storage
 Homestead.json
 Homestead.yaml
 Thumbs.db
-.aider*

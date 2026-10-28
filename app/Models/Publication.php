@@ -23,6 +23,7 @@ class Publication extends Model
         'date_creation', 
         'id_utilisateur', 
         'id_categorie',
+        'image_path',
         'statut'
     ];
 
