@@ -1,11 +1,135 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../views';
+@source '../js';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer components {
+    .auth-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 4rem);
+        padding: 2rem 1rem;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 26rem;
+        padding: 2.25rem 2rem;
+        background-color: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.875rem;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    }
+
+    .auth-header {
+        margin-bottom: 1.75rem;
+        text-align: center;
+    }
+
+    .auth-card h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.375rem;
+        color: #111827;
+    }
+
+    .auth-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .form-group {
+        margin-bottom: 1.125rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.375rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: #111827;
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-group select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.625rem center;
+        background-size: 1.25rem;
+        padding-right: 2.25rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgb(99 102 241 / 0.2);
+    }
+
+    .form-error {
+        margin-top: 0.375rem;
+        font-size: 0.8125rem;
+        color: #dc2626;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #fff;
+        background-color: #4f46e5;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.15s;
+    }
+
+    .btn-primary:hover {
+        background-color: #4338ca;
+    }
+
+    .btn-primary:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgb(99 102 241 / 0.4);
+    }
+
+    .auth-footer {
+        margin-top: 1.5rem;
+        font-size: 0.875rem;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .auth-footer a {
+        color: #4f46e5;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
 }

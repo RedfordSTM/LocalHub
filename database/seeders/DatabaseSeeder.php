@@ -7,6 +7,7 @@ use App\Models\Publication;
 use App\Models\Reservation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Database\Seeders\CategorySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +25,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(CategorySeeder::class);
+
+        User::updateOrCreate(
+            ['courriel' => config('admin.email')],
+            [
+                'nom' => config('admin.nom'),
+                'prenom' => config('admin.prenom'),
+                'ville' => config('admin.ville'),
+                'mot_de_passe' => Hash::make(config('admin.password')),
+                'role' => User::ROLE_MANAGER,
+            ],
+        );
+
         $utilisateurs = [
             ['nom' => 'Tremblay', 'prenom' => 'Alex', 'courriel' => 'alex.tremblay@localhub.test', 'ville' => 'Montréal'],
             ['nom' => 'Gagnon', 'prenom' => 'Sarah', 'courriel' => 'sarah.gagnon@localhub.test', 'ville' => 'Montréal'],

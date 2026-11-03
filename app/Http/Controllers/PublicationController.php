@@ -6,10 +6,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Publication;
-use App\Models\User;
 use App\Http\Requests\EnregistrerPublicationRequest;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use Illuminate\Support\Facades\Gate;
+
 
 class PublicationController extends Controller
 {
@@ -40,8 +41,6 @@ class PublicationController extends Controller
      */
     public function store(EnregistrerPublicationRequest $request): RedirectResponse
     {
-        $user = User::query()->firstOrFail();
-
         $data = $request->safe()->except('image');
         $path = $request->file('image')?->store('publications', 'public');
 
@@ -49,7 +48,7 @@ class PublicationController extends Controller
             $publication = Publication::create([
                 ...$data,
                 ...($path ? ['image_path' => $path] : []),
-                'id_utilisateur' => $user->id_utilisateur,
+                'id_utilisateur' => $request->user()->id_utilisateur,
                 'date_creation' => now(),
             ]);
         } catch (Throwable $exception) {
@@ -80,6 +79,8 @@ class PublicationController extends Controller
      */
     public function edit(Publication $publication): View
     {
+        Gate::authorize('update', $publication);
+
         return view('publications.edit', compact('publication'));
     }
 
@@ -88,6 +89,8 @@ class PublicationController extends Controller
      */
     public function update(EnregistrerPublicationRequest $request, Publication $publication): RedirectResponse
     {
+        Gate::authorize('update', $publication);
+
         $data = $request->safe()->except('image');
         $newPath = $request->file('image')?->store('publications', 'public');
         $oldPath = $publication->image_path;
@@ -117,9 +120,19 @@ class PublicationController extends Controller
      */
     public function destroy(Publication $publication): RedirectResponse
     {
+        Gate::authorize('delete', $publication);
+
         $publication->delete();
 
         return redirect()->route('publications.index')
             ->with('status', 'publication supprimé.');
+    }
+
+    private function authorizeOwner(Publication $publication): void
+    {
+        abort_unless(
+            auth()->check() && auth()->id() === $publication->id_utilisateur,
+            403
+        );
     }
 }

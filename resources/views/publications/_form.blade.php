@@ -1,7 +1,14 @@
 @php
+    use App\Enums\PublicationType;
+    use App\Models\Category;
+
     $inputClass = 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500';
     $labelClass = 'mb-1 block text-sm font-medium text-slate-700';
     $errorClass = 'mt-1 text-sm text-rose-600';
+
+    $categories = Category::orderBy('nom')->get();
+    $currentType = old('type', $publication?->type?->value ?? $publication?->type);
+    $currentCategorie = old('id_categorie', $publication?->id_categorie);
 @endphp
 
 <div class="space-y-5">
@@ -20,7 +27,14 @@
     <div class="grid gap-5 sm:grid-cols-2">
         <div>
             <label for="type" class="{{ $labelClass }}">Type</label>
-            <input id="type" name="type" value="{{ old('type', $publication?->type) }}" class="{{ $inputClass }}">
+            <select id="type" name="type" class="{{ $inputClass }}">
+                <option value="">Sélectionner un type</option>
+                @foreach (PublicationType::cases() as $type)
+                    <option value="{{ $type->value }}" @selected($currentType === $type->value)>
+                        {{ $type->label() }}
+                    </option>
+                @endforeach
+            </select>
             @error('type') <p class="{{ $errorClass }}">{{ $message }}</p> @enderror
         </div>
 
@@ -38,7 +52,14 @@
 
         <div>
             <label for="id_categorie" class="{{ $labelClass }}">Catégorie</label>
-            <input id="id_categorie" name="id_categorie" type="number" value="{{ old('id_categorie', $publication?->id_categorie) }}" class="{{ $inputClass }}">
+            <select id="id_categorie" name="id_categorie" class="{{ $inputClass }}">
+                <option value="">Sélectionner une catégorie</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id_categorie }}" @selected((int) $currentCategorie === $category->id_categorie)>
+                        {{ $category->nom }}
+                    </option>
+                @endforeach
+            </select>
             @error('id_categorie') <p class="{{ $errorClass }}">{{ $message }}</p> @enderror
         </div>
 

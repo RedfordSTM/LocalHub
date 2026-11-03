@@ -23,10 +23,35 @@
                    class="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
                     Publications
                 </a>
-                <a href="{{ route('publications.create') }}"
-                   class="rounded-md bg-slate-900 px-3 py-1.5 font-medium text-white hover:bg-slate-700">
-                    Nouvelle publication
-                </a>
+
+                @auth
+                    @if (auth()->user()?->role === \App\Models\User::ROLE_MANAGER)
+                        <a href="{{ route('admin.index') }}"
+                           class="rounded-md bg-amber-500 px-3 py-1.5 font-medium text-white hover:bg-amber-600">
+                            Administration
+                        </a>
+                    @endif
+                    <a href="{{ route('account.show') }}"
+                       class="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                        Mon compte
+                    </a>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                            Se déconnecter
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                        Connexion
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="rounded-md bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-700">
+                        Inscription
+                    </a>
+                @endauth
             </nav>
         </div>
     </header>
@@ -37,6 +62,11 @@
                 {{ session('status') }}
             </div>
         @endif
+
+        @push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endpush
+
 
         @yield('content')
     </main>

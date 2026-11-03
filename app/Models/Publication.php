@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PublicationType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,7 @@ class Publication extends Model
         return [
             'date_creation' => 'datetime',
             'prix' => 'decimal:2',
+            'type' => PublicationType::class,
         ];
     }
 

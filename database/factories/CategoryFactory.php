@@ -12,7 +12,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'nom' => fake()->unique()->word(),
+            'nom' => fake()->unique()->words(3, true),
             'description' => fake()->sentence(),
         ];
     }
